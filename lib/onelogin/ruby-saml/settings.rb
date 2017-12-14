@@ -1,6 +1,7 @@
 require "xml_security"
 require "onelogin/ruby-saml/attribute_service"
 require "onelogin/ruby-saml/utils"
+require "onelogin/ruby-saml/logging"
 
 # Only supports SAML 2.0
 module OneLogin
@@ -129,6 +130,8 @@ module OneLogin
       # @return [Hash with 2 arrays of OpenSSL::X509::Certificate] Build multiple IdP certificates from the settings.
       #
       def get_idp_cert_multi
+        Logging.info("Inside get_idp_cert_multi")
+        Logging.info("idp_cert_multi is #{idp_cert_multi}")
         return nil if idp_cert_multi.nil? || idp_cert_multi.empty?
 
         raise ArgumentError.new("Invalid value for idp_cert_multi") if not idp_cert_multi.is_a?(Hash)
@@ -137,14 +140,18 @@ module OneLogin
 
         if idp_cert_multi.key?(:signing) and not idp_cert_multi[:signing].empty?
           idp_cert_multi[:signing].each do |idp_cert|
+            Logging.info("Reformatting and copying signing cert #{idp_cert.inspect}")
             formatted_cert = OneLogin::RubySaml::Utils.format_cert(idp_cert)
+            Logging.info("Formatted cert is #{formatted_cert.inspect}")
             certs[:signing].push(OpenSSL::X509::Certificate.new(formatted_cert))
           end
         end
 
         if idp_cert_multi.key?(:encryption) and not idp_cert_multi[:encryption].empty?
           idp_cert_multi[:encryption].each do |idp_cert|
+            Logging.info("Reformatting and copying encryption cert #{idp_cert.inspect}")
             formatted_cert = OneLogin::RubySaml::Utils.format_cert(idp_cert)
+            Logging.info("Formatted cert is #{formatted_cert.inspect}")
             certs[:encryption].push(OpenSSL::X509::Certificate.new(formatted_cert))
           end
         end
