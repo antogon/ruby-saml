@@ -1,5 +1,6 @@
 require "xml_security"
 require "onelogin/ruby-saml/attributes"
+require "onelogin/ruby-saml/logging"
 
 require "time"
 require "nokogiri"
@@ -795,6 +796,7 @@ module OneLogin
       # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_signature
+        Logging.info "Validating Signature..."
         error_msg = "Invalid Signature on SAML Response"
 
         # If the response contains the signature, and the assertion was encrypted, validate the original SAML Response
@@ -805,10 +807,12 @@ module OneLogin
           { "p" => PROTOCOL, "ds" => DSIG },
           { 'id' => document.signed_element_id }
         )
+        Logging.info "sig_elements are #{sig_elements.inspect}"
 
         use_original = sig_elements.size == 1 || decrypted_document.nil?
         doc = use_original ? document : decrypted_document
 
+        Logging.info "doc is #{doc.inspect}"
         # Check signature nodes
         if sig_elements.nil? || sig_elements.size == 0
           sig_elements = REXML::XPath.match(
@@ -819,24 +823,33 @@ module OneLogin
           )
         end
 
+        Logging.info "sig_elements are now #{sig_elements.inspect}"
+
         if sig_elements.size != 1
           return append_error(error_msg)
         end
 
         idp_certs = settings.get_idp_cert_multi
+        Logging.info "idp_certs are #{idp_certs.inspect}"
         if idp_certs.nil? || idp_certs[:signing].empty?
           opts = {}
           opts[:fingerprint_alg] = settings.idp_cert_fingerprint_algorithm
           opts[:cert] = settings.get_idp_cert
           fingerprint = settings.get_fingerprint
 
+          Logging.info "opts are #{opts.inspect}"
+          Logging.info "fingerprint is #{fingerprint.inspect}"
+
           unless fingerprint && doc.validate_document(fingerprint, @soft, opts)
+            Logging.info "document must not have been valid.  appending error."
             return append_error(error_msg)
           end
         else
           valid = false
           idp_certs[:signing].each do |idp_cert|
+            Logging.info "Validating document with cert #{idp_cert.inspect}"
             valid = doc.validate_document_with_cert(idp_cert)
+            Logging.info "valid was #{valid.inspect}"
             if valid
               break
             end
