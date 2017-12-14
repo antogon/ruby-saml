@@ -796,7 +796,7 @@ module OneLogin
       # @raise [ValidationError] if soft == false and validation fails
       #
       def validate_signature
-        Logging.info "Validating Signature..."
+        Logging.info "Validating Signature from\n#{Kernel.caller.join("\n")}"
         error_msg = "Invalid Signature on SAML Response"
 
         # If the response contains the signature, and the assertion was encrypted, validate the original SAML Response
