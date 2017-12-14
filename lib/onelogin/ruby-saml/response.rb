@@ -40,6 +40,7 @@ module OneLogin
       #                          or skip the subject confirmation validation with the :skip_subject_confirmation option
       #                          or skip the recipient validation of the subject confirmation element with :skip_recipient_check option
       def initialize(response, options = {})
+        Logging.info("Initializing response with options #{options.inspect}")
         raise ArgumentError.new("Response cannot be nil") if response.nil?
 
         @errors = []
@@ -829,6 +830,12 @@ module OneLogin
           return append_error(error_msg)
         end
 
+        Logging.info("settings is #{settings.inspect}")
+        Logging.info("settings idp_cert_multi is #{settings.idp_cert_multi.inspect}")
+        Logging.info("settings get_idp_cert_multi is #{settings.get_idp_cert_multi.inspect}")
+        Logging.info("@settings is #{@settings.inspect}")
+        Logging.info("@settings idp_cert_multi is #{@settings.idp_cert_multi.inspect}")
+        Logging.info("@settings get_idp_cert_multi is #{@settings.get_idp_cert_multi.inspect}")
         idp_certs = settings.get_idp_cert_multi
         Logging.info "idp_certs are #{idp_certs.inspect}"
         if idp_certs.nil? || idp_certs[:signing].empty?
