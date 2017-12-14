@@ -138,6 +138,7 @@ module OneLogin
 
         certs = {:signing => [], :encryption => [] }
 
+        Logging.info("Signing bits are #{idp_cert_multi.key?(:signing)} and not #{idp_cert_multi[:signing].empty?} because of #{idp_cert_multi[:signing]}")
         if idp_cert_multi.key?(:signing) and not idp_cert_multi[:signing].empty?
           idp_cert_multi[:signing].each do |idp_cert|
             Logging.info("Reformatting and copying signing cert #{idp_cert.inspect}")
@@ -147,6 +148,7 @@ module OneLogin
           end
         end
 
+        Logging.info("Signing bits are #{idp_cert_multi.key?(:encryption)} and not #{idp_cert_multi[:encryption].empty?} because of #{idp_cert_multi[:encryption]}")
         if idp_cert_multi.key?(:encryption) and not idp_cert_multi[:encryption].empty?
           idp_cert_multi[:encryption].each do |idp_cert|
             Logging.info("Reformatting and copying encryption cert #{idp_cert.inspect}")
